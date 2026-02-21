@@ -15,7 +15,6 @@ export default function Navbar({ user }) {
     };
 
     const navLinks = [
-        { path: "/", label: "Home" },
         ...(user ? [
             { path: "/upload", label: "Find Jobs" },
             { path: "/profile", label: "Profile" },

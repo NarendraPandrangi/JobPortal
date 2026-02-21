@@ -27,13 +27,25 @@ export default function FilterPanel({ filters, setFilters, totalJobs, filteredCo
                         className="form-input"
                         value={filters.experience}
                         onChange={(e) => update("experience", e.target.value)}
-                        style={{ fontSize: 13, padding: "8px 12px", cursor: "pointer" }}
+                        style={{
+                            fontSize: 13,
+                            padding: "8px 12px",
+                            cursor: "pointer",
+                            backgroundColor: "#1a1a28",
+                            color: "#f1f5f9",
+                            appearance: "none",
+                            WebkitAppearance: "none",
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 12px center",
+                            paddingRight: 32,
+                        }}
                     >
-                        <option value="">Any experience</option>
-                        <option value="0-1">Fresher (0–1 yr)</option>
-                        <option value="1-3">Junior (1–3 yrs)</option>
-                        <option value="3-5">Mid-level (3–5 yrs)</option>
-                        <option value="5">Senior (5+ yrs)</option>
+                        <option value="" style={{ background: "#1a1a28", color: "#f1f5f9" }}>Any experience</option>
+                        <option value="0-1" style={{ background: "#1a1a28", color: "#f1f5f9" }}>Fresher (0–1 yr)</option>
+                        <option value="1-3" style={{ background: "#1a1a28", color: "#f1f5f9" }}>Junior (1–3 yrs)</option>
+                        <option value="3-5" style={{ background: "#1a1a28", color: "#f1f5f9" }}>Mid-level (3–5 yrs)</option>
+                        <option value="5" style={{ background: "#1a1a28", color: "#f1f5f9" }}>Senior (5+ yrs)</option>
                     </select>
                 </div>
 

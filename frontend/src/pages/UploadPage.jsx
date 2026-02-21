@@ -2,16 +2,17 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { storage, db } from "../firebase";
 import axios from "axios";
 import JobCard from "../components/JobCard";
 import FilterPanel from "../components/FilterPanel";
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const MSG = { SYSTEM: "system", AI: "ai", JOBS: "jobs", ERROR: "error" };
 
 export default function UploadPage({ user }) {
+    const chatFileInputRef = useRef(null);
     const [messages, setMessages] = useState([
         { id: 1, type: MSG.SYSTEM, text: "👋 Hi! Upload your resume (PDF or DOCX) and I'll find the best jobs for your skills." },
     ]);
@@ -86,19 +87,31 @@ export default function UploadPage({ user }) {
                 push({ type: MSG.AI, text: "💡 Make sure the backend is running: `python -m uvicorn main:app --reload --port 8000`" });
             }
 
-            // ── Step 2: Firebase Storage + Firestore save in background (non-blocking) ──
+            // ── Step 2: Save to Firestore immediately (ensures profile count updates) ──
+            let firestoreDocRef = null;
+            try {
+                firestoreDocRef = await addDoc(collection(db, "users", user.uid, "uploads"), {
+                    fileName: file.name,
+                    fileURL: "",           // filled in by background Storage upload below
+                    uploadedAt: serverTimestamp(),
+                });
+            } catch (fsErr) {
+                console.error("Firestore save failed:", fsErr.message);
+            }
+
+            // ── Step 3: Firebase Storage upload in background — updates the Firestore URL ──
             try {
                 const fileRef = ref(storage, `resumes/${user.uid}/${Date.now()}_${file.name}`);
                 const task = uploadBytesResumable(fileRef, file);
                 task.on("state_changed", null, null, async () => {
                     const url = await getDownloadURL(task.snapshot.ref);
-                    await addDoc(collection(db, "users", user.uid, "uploads"), {
-                        fileName: file.name,
-                        fileURL: url,
-                        uploadedAt: serverTimestamp(),
-                    });
+                    if (firestoreDocRef) {
+                        await updateDoc(firestoreDocRef, { fileURL: url });
+                    }
                 });
-            } catch (_) { /* non-critical — profile history will just not show this upload */ }
+            } catch (_) { /* non-critical */ }
+
+
 
         } catch (err) {
             push({ type: MSG.ERROR, text: `❌ Error: ${err.message}` });
@@ -201,7 +214,32 @@ export default function UploadPage({ user }) {
                         </div>
                         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, color: "#475569", fontSize: 14 }}>
                             <span>💡</span>
-                            <span>Upload a resume to start — your AI job assistant is ready!</span>
+                            <span style={{ flex: 1 }}>Upload a resume to start — your AI job assistant is ready!</span>
+                            <input
+                                ref={chatFileInputRef}
+                                type="file"
+                                accept=".pdf,.docx"
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        if (!file.name.match(/\.(pdf|docx)$/i)) {
+                                            push({ type: MSG.ERROR, text: "❌ Only PDF and DOCX files are supported." });
+                                        } else {
+                                            processResume(file);
+                                        }
+                                    }
+                                    e.target.value = "";
+                                }}
+                            />
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => chatFileInputRef.current?.click()}
+                                disabled={uploading}
+                                style={{ padding: "8px 16px", fontSize: 13, flexShrink: 0 }}
+                            >
+                                📄 Upload Resume
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -219,12 +257,7 @@ function ChatMessage({ msg, filteredJobs }) {
         return (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                    {filteredJobs.slice(0, 6).map((job, i) => <JobCard key={i} job={job} />)}
-                    {filteredJobs.length > 6 && (
-                        <div style={{ width: "100%", textAlign: "center", color: "#94a3b8", fontSize: 13, padding: "8px 0" }}>
-                            +{filteredJobs.length - 6} more jobs match your profile
-                        </div>
-                    )}
+                    {filteredJobs.map((job, i) => <JobCard key={i} job={job} />)}
                 </div>
             </motion.div>
         );

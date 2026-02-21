@@ -57,7 +57,6 @@ export default function ProfilePage({ user }) {
                         </h1>
                         <p style={{ color: "#94a3b8", fontSize: 14, marginBottom: 12 }}>{user.email}</p>
                         <div style={{ display: "flex", gap: 10 }}>
-                            <span className="badge badge-accent">📄 {uploads.length} Resume{uploads.length !== 1 ? "s" : ""} Uploaded</span>
                             <span className="badge badge-success">✅ Active</span>
                         </div>
                     </div>
