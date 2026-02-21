@@ -5,11 +5,7 @@ Resume parsing service:
 - Detects skills using case-sensitive keyword matching to avoid false positives
 """
 
-import re, io, sys
-
-_libs = r"D:\PyLibs"
-if _libs not in sys.path:
-    sys.path.insert(0, _libs)
+import re, io
 
 # ── Skill List ────────────────────────────────────────────────────────────────
 # Only include skills reliably written with consistent capitalisation in resumes.
