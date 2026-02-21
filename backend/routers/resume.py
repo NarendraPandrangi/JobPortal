@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from services.parser import extract_text_from_bytes, extract_skills, generate_search_query
+
+try:
+    from backend.services.parser import extract_text_from_bytes, extract_skills, generate_search_query
+except ImportError:
+    from services.parser import extract_text_from_bytes, extract_skills, generate_search_query
 
 router = APIRouter()
 

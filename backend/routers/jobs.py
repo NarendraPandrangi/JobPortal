@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Query
 from typing import Optional
-from services.job_fetcher import fetch_jobs
+
+try:
+    from backend.services.job_fetcher import fetch_jobs
+except ImportError:
+    from services.job_fetcher import fetch_jobs
 
 router = APIRouter()
 

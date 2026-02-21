@@ -1,13 +1,13 @@
 import sys, os
-# Ensure D:\PyLibs (where pdfplumber/python-docx live) is on the path
-_libs = r"D:\PyLibs"
-if _libs not in sys.path:
-    sys.path.insert(0, _libs)
 
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from routers import resume, jobs
+
+try:
+    from backend.routers import resume, jobs
+except ImportError:
+    from routers import resume, jobs
 
 # ── Logging Setup ──────────────────────────────────────────────
 logging.basicConfig(
