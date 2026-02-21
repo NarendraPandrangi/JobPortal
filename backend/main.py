@@ -1,13 +1,13 @@
 import sys, os
+# Ensure D:\PyLibs (where pdfplumber/python-docx live) is on the path
+_libs = r"D:\PyLibs"
+if _libs not in sys.path:
+    sys.path.insert(0, _libs)
 
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-
-try:
-    from backend.routers import resume, jobs
-except ImportError:
-    from routers import resume, jobs
+from routers import resume, jobs
 
 # ── Logging Setup ──────────────────────────────────────────────
 logging.basicConfig(
@@ -23,11 +23,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow React dev server + deployed frontend
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+# Allow React dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in cors_origins],
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

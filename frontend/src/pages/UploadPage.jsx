@@ -8,7 +8,7 @@ import axios from "axios";
 import JobCard from "../components/JobCard";
 import FilterPanel from "../components/FilterPanel";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? "http://localhost:8000" : "/api");
+const BACKEND_URL = "http://localhost:8000";
 const MSG = { SYSTEM: "system", AI: "ai", JOBS: "jobs", ERROR: "error" };
 
 export default function UploadPage({ user }) {
